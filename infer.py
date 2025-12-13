@@ -1,22 +1,28 @@
 from ultralytics import YOLO
-from PIL import Image
-import numpy as np
 
+# Load model 1 lần khi start app
 model = YOLO("best.pt")
 
-# warm-up
-_dummy = Image.fromarray(np.zeros((224,224,3), dtype=np.uint8))
-model(_dummy)
+def predict(image_path: str):
+    results = model(image_path)
 
-def predict(image: Image.Image):
-    r = model(image)[0]
-    probs = r.probs
+    r = results[0]
 
-    cls_id = int(probs.top1)
-    conf = float(probs.top1conf)
+    if hasattr(r, "probs") and r.probs is not None:
+        # YOLO classification
+        return {
+            "top1": int(r.probs.top1),
+            "confidence": float(r.probs.top1conf),
+            "probs": r.probs.data.tolist()
+        }
 
-    return {
-        "class_id": cls_id,
-        "label": model.names[cls_id],
-        "confidence": conf
-    }
+    # YOLO detection
+    detections = []
+    for box in r.boxes:
+        detections.append({
+            "cls": int(box.cls),
+            "conf": float(box.conf),
+            "xyxy": box.xyxy.tolist()
+        })
+
+    return detections

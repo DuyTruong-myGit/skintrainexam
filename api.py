@@ -1,19 +1,24 @@
 from fastapi import FastAPI, UploadFile, File
-from ultralytics import YOLO
-from PIL import Image
-import io
+import shutil
+import uuid
+import os
+from infer import predict
 
 app = FastAPI()
 
-model = YOLO("best.pt")
+@app.get("/")
+def health():
+    return {"status": "ok"}
 
 @app.post("/predict")
-async def predict(file: UploadFile = File(...)):
-    image = Image.open(io.BytesIO(await file.read()))
-    results = model(image)
+async def predict_image(file: UploadFile = File(...)):
+    ext = file.filename.split(".")[-1]
+    temp_name = f"/tmp/{uuid.uuid4()}.{ext}"
 
-    probs = results[0].probs
-    return {
-        "class": int(probs.top1),
-        "confidence": float(probs.top1conf)
-    }
+    with open(temp_name, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    result = predict(temp_name)
+    os.remove(temp_name)
+
+    return result
