@@ -1,6 +1,7 @@
+# requirements.txt
 fastapi==0.109.0
 uvicorn[standard]==0.27.0
-ultralytics>=8.3.0
+ultralytics>=8.3.40  <-- Cập nhật dòng này (ép phiên bản mới hơn)
 opencv-python-headless==4.9.0.80
 pillow==10.2.0
 numpy==1.26.3

@@ -19,7 +19,7 @@ COPY requirements.txt .
 
 # Install Python dependencies with CPU-only PyTorch
 RUN pip install --no-cache-dir \
-    torch==2.1.2 --index-url https://download.pytorch.org/whl/cpu && \
+    torch==2.4.0 --index-url https://download.pytorch.org/whl/cpu && \
     pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
